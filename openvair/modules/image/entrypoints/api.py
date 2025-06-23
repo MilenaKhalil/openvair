@@ -16,6 +16,7 @@ Endpoints:
         machine.
 """
 
+import json
 from uuid import UUID
 from typing import Dict, Optional, cast
 from pathlib import Path as Path_lib
@@ -23,6 +24,7 @@ from pathlib import Path as Path_lib
 import aiofiles
 from fastapi import (
     File,
+    Form,
     Query,
     Depends,
     APIRouter,
@@ -122,15 +124,8 @@ async def get_image(
     response_model=schemas.Image,
     status_code=status.HTTP_200_OK,
 )
-async def upload_image(  # noqa: PLR0913 need create a schema for arguments
-    storage_id: UUID,
-    description: str = Query(
-        default='',
-        description='Image description',
-    ),
-    name: str = Query(
-        description='Image name',
-    ),
+async def upload_image(
+    image_info: str = Form(...),
     image: UploadFile = File(..., description='Upload image.'),
     user_info: Dict = Depends(get_current_user),
     crud: ImageCrud = Depends(ImageCrud),
@@ -141,9 +136,8 @@ async def upload_image(  # noqa: PLR0913 need create a schema for arguments
     uploads it to the specified storage using the `ImageCrud` service.
 
     Args:
-        description (str): Description of the image.
-        storage_id (str): ID of the storage where the image will be saved.
-        name (str): Name of the image file.
+        image_info (ImageInfo): Includes description of the image, ID of the
+        storage where the image will be saved, name of the image file.
         image (UploadFile): The uploaded image file.
         user_info (Dict): Authorized user information.
         crud (ImageCrud): Dependency injection for CRUD operations.
@@ -158,6 +152,8 @@ async def upload_image(  # noqa: PLR0913 need create a schema for arguments
         HTTPException: If the file name exceeds the allowed length or if
         the file extension is unsupported.
     """
+    image_info_obj = schemas.UploadImage(**json.loads(image_info))
+    name = image_info_obj.name
     LOG.info(f'Api start uploading image: {name}')
     tmp_path = Path_lib(TMP_DIR, name)
     filename_length = 40
@@ -178,8 +174,8 @@ async def upload_image(  # noqa: PLR0913 need create a schema for arguments
         upload_info = await run_in_threadpool(
             crud.upload_image,
             name,
-            storage_id,
-            description,
+            image_info_obj.storage_id,
+            image_info_obj.description,
             user_info,
         )
         LOG.info('Api request was successfully processed.')
@@ -221,7 +217,7 @@ async def delete_image(
     message = f'Image {image_id} successfully deleted.'
     LOG.info(message)
     return JSONResponse(result)
-
+# cd0467a6-d292-49b1-89dd-06adf80be406
 
 @router.post(
     '/{image_id}/attach/',

@@ -13,6 +13,7 @@ Classes:
     DetachImage: Represents the data required to detach an image from a VM.
     AttachImageInfo: Represents metadata for an attached image, such as
         its path, size, and provisioning information.
+    UploadImage: Represents an uploading of the image
 """
 
 from uuid import UUID
@@ -113,6 +114,24 @@ class DetachImage(BaseModel):
     """
 
     vm_id: UUID
+
+
+class UploadImage(BaseModel):
+    """Represents metadata for uploading image.
+
+    This schema includes information about storage id, description and
+    image name
+
+    Attributes:
+        storage_id (UUID): Storage id where the image should be attached.
+        name (str): The name of the image.
+        description (str): The description of the image. Empty str by
+        default.
+    """
+
+    storage_id: UUID
+    name: str = Field(max_length=40)
+    description: str = Field(default='')
 
 
 class AttachImageInfo(BaseModel):
