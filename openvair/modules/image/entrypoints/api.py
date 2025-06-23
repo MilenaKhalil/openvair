@@ -136,8 +136,8 @@ async def upload_image(
     uploads it to the specified storage using the `ImageCrud` service.
 
     Args:
-        image_info (ImageInfo): Includes description of the image, ID of the
-        storage where the image will be saved, name of the image file.
+        image_info (str): A json string which includes description of the image,
+        ID of the storage where the image will be saved, name of the image file.
         image (UploadFile): The uploaded image file.
         user_info (Dict): Authorized user information.
         crud (ImageCrud): Dependency injection for CRUD operations.
@@ -217,7 +217,7 @@ async def delete_image(
     message = f'Image {image_id} successfully deleted.'
     LOG.info(message)
     return JSONResponse(result)
-# cd0467a6-d292-49b1-89dd-06adf80be406
+
 
 @router.post(
     '/{image_id}/attach/',

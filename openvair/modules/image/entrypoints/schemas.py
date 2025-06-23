@@ -13,7 +13,7 @@ Classes:
     DetachImage: Represents the data required to detach an image from a VM.
     AttachImageInfo: Represents metadata for an attached image, such as
         its path, size, and provisioning information.
-    UploadImage: Represents an uploading of the image
+    UploadImage: Represents the data required to upload an image.
 """
 
 from uuid import UUID
